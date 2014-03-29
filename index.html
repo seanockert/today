@@ -11,7 +11,7 @@
     
 	<title>Today List</title>	
 	
-	<link rel="stylesheet" href="css/base.css">
+	<link rel="stylesheet" href="css/base.css?v=3">
 	<link rel='stylesheet' id='opensans' href='http://fonts.googleapis.com/css?family=Open+Sans:300,800' type='text/css' media='all' />
 	
 	<script src="js/angular.min.js"></script>
@@ -48,13 +48,16 @@
 				<ul id="todo-list">
 					<li ng-repeat="todo in todos | filter:dayFilter | orderBy: 'completed'" ng-class="{completed: todo.completed, editing: todo == editedTodo}">
 						<div class="view">
-							<input class="toggle" type="checkbox" ng-model="todo.completed" ng-click="update();">
+							<input class="toggle" type="checkbox" ng-model="todo.completed" ng-click="update(todo);">
 							<label ng-dblclick="editTodo(todo)">{{todo.title}}</label>
-							<button class="destroy" ng-click="delete(todo)"></button>
+							<button class="destroy" title="Delete this item" ng-click="delete(todo)"></button>
+							<button class="prevday" title="Move to prev day" ng-click="prevday(todo)"></button>								
+							<button class="nextday" title="Move to next day" ng-click="nextday(todo)"></button>													
 						</div>
 						<form ng-submit="doneEditing(todo)">
 							<input class="edit" ng-model="todo.title" todo-escape="revertEditing(todo)" ng-blur="doneEditing(todo)" ng-focus="startEditing()">
 						</form>
+
 					</li>
 				</ul>
 			</section>

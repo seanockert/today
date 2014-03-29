@@ -13,8 +13,11 @@ today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $rou
 
 	function tick() {
         Data.query(function(todos){
-        	$scope.todos = todos;
-        	todoCRUD.count($scope);	
+        	if (isPolling) {
+        		$scope.todos = todos;
+        		todoCRUD.count($scope);	
+        		console.log('polled');
+        	}
             $timeout(tick, 5000);
         });
     };
@@ -50,8 +53,8 @@ today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $rou
     tick();*/
 
 	document.addEventListener('focus',function(e){
-	    tick();
-	    console.log('Focused');
+	    //tick();
+	    //console.log('Focused');
 	}, true);
 
 	$scope.oneday = 1000*60*60*24; // One day in milliseconds
@@ -97,15 +100,26 @@ today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $rou
 		todoCRUD.create($scope);
 		$scope.newTodo = '';
 		isPolling = false;	
-
 	};
 
 	$scope.delete = function (todo) {
 		isPolling = false;
 		todoCRUD.delete($scope, todo);	
+	};	
+	
+	$scope.prevday = function (todo) {
+		console.log(todo.day);
+		todo.day = todo.day - 1;
+		todoCRUD.update($scope, todo);	
+	};	
+	
+	$scope.nextday = function (todo) {
+		todo.day = todo.day + 1;
+		todoCRUD.update($scope, todo);	
 	};
 	
-	$scope.update = function() {
+	$scope.update = function(todo) {
+		todo.completed = (todo.completed == true ? false : true);
 		todoCRUD.update($scope);
 	}	
 	
@@ -131,6 +145,14 @@ today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $rou
 	$scope.revertEditing = function (todo) {
 		$scope.todos[$scope.todos.indexOf(todo)] = $scope.originalTodo;
 		$scope.doneEditing($scope.originalTodo);
+		console.log('revert');
+		isPolling = true;
+	};	
+	
+	$scope.startEditing = function (todo) {
+		todo = $scope.editedTodo;
+		console.log('start');
+		isPolling = false;
 	};
 
 

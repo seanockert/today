@@ -6,7 +6,10 @@ body {
 	width: 100%;
 	overflow: hidden;	
 	background: #161616;
-	font-family: sans-serif;
+}
+
+input, button {
+	outline: none !important;
 }
 
 
@@ -19,6 +22,7 @@ button {
 	vertical-align: baseline;
 	font-family: inherit;
 	color: inherit;
+	cursor: pointer;
 	-webkit-appearance: none;
 }
 
@@ -231,11 +235,13 @@ label[for='toggle-all'] {
 	transition: color 0.4s;
 }
 
-#todo-list li .destroy {
+#todo-list li .destroy,
+#todo-list li .prevday,
+#todo-list li .nextday {
 	display: none;
 	position: absolute;
 	top: 0;
-	right: 10px;
+	right: 50px;
 	bottom: 0;
 	width: 40px;
 	height: 40px;
@@ -247,7 +253,9 @@ label[for='toggle-all'] {
 	transition: all 0.1s;
 }
 
-#todo-list li .destroy:hover {
+#todo-list li .destroy:hover,
+#todo-list li .prevday:hover,
+#todo-list li .nextday:hover {
 	-webkit-transform: scale(1.3);
 	-moz-transform: scale(1.3);
 	transform: scale(1.3);
@@ -258,9 +266,35 @@ label[for='toggle-all'] {
 	color: red;
 }
 
-#todo-list li:hover .destroy {
+#todo-list li .prevday:after {
+	content:'\25c0';
+	color: #777;
+}
+
+#todo-list li .nextday:after {
+	content:'\25b6';
+	color: #777;
+}
+
+#todo-list li:hover .destroy,
+#todo-list li:hover .prevday,
+#todo-list li:hover .nextday {
 	display: block;
 }
+
+#todo-list li .prevday {
+	right: 25px;
+}
+
+#todo-list li .nextday {
+	right: 0px;
+}
+
+#todo-list li .prevday:hover:after,
+#todo-list li .nextday:hover:after {
+	color: #aaa;
+}
+
 
 #todo-list li .edit {
 	display: none;
