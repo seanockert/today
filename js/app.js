@@ -5,7 +5,7 @@
  *
  * @type {angular.Module}
  */
-var today = angular.module('today', ['ngResource']);
+var today = angular.module('today', ['ngResource', 'ngRoute']);
 
 today.config(function ($routeProvider) {
     $routeProvider
