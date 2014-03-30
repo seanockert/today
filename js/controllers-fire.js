@@ -2,30 +2,18 @@
 'use strict';
 
 
-today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $routeParams, todoCRUD, $timeout, Data) {
-		
-	var pollTime = 3000;
-	var isPolling = true;
+today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $routeParams, $timeout, $firebase, $filter) {
 	
+	var fbURL = 'https://balsamade.firebaseio.com/today';	
+
 	$scope.todos = [];
 
 	$scope.editedTodo = null;
 
-	function tick() {
-        Data.query(function(todos){
-        	if (isPolling) {
-        		$scope.todos = todos;
-        		console.log($scope.todos);
-        		todoCRUD.count($scope);	
-        	}
-            $timeout(tick, 5000);
-        });
-    };
-    tick();
-
-	document.addEventListener('focus',function(e){
-	    //tick();
-	}, true);
+  	var db = new Firebase(fbURL);
+    $scope.todos = $firebase(db);
+    $scope.len = $scope.todos.length;
+ 
 
 	$scope.oneday = 1000*60*60*24; // One day in milliseconds
 
@@ -33,7 +21,6 @@ today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $rou
 	$scope.today = Math.round(new Date(now.getFullYear(), now.getMonth(), now.getDate())/$scope.oneday);
 
 	$scope.selectedDay = $scope.today;
-	
 	$scope.dayFilter = { day: $scope.selectedDay };
 
 	// Init days starting from yesterday
@@ -47,9 +34,25 @@ today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $rou
 	    {day: $scope.today + 5},
 	    {day: $scope.today + 6},
 	    {day: $scope.today + 7},
-	];		
-	console.log($scope.days);
-
+	];
+	
+	$scope.$watch('todos', function () {
+		var total = 0;
+		$scope.todos.$getIndex().forEach(function (index) {
+			var todo = $scope.todos[index];
+			// Skip invalid entries so they don't break the entire app.
+			if (!todo || !todo.title) {
+				return;
+			}
+			total++;
+			
+		
+		});
+		$scope.totalCount = total;
+		$scope.count();
+		//console.log($scope.days);
+	}, true);   
+			
     // Change day
 	$scope.$on('$routeChangeSuccess', function (ev, current, prev) {
 		var day = $routeParams['day']
@@ -60,39 +63,44 @@ today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $rou
 			}	
 			
 			$scope.selectedDay = day;
-			$scope.dayFilter = { day: $scope.selectedDay};
+			$scope.dayFilter = { day: $scope.selectedDay };
 			
 		}	
 	});	
 
 
 	$scope.create = function () {	
-		todoCRUD.create($scope);
+		var newTodo = $scope.newTodo.trim();
+		if (!newTodo.length) {
+			return;
+		}
+
+		$scope.todos.$add({
+			title: newTodo,
+			day: $scope.selectedDay,
+			completed: false
+		});	
 		$scope.newTodo = '';
-		isPolling = false;	
 	};
 
 	$scope.delete = function (todo) {
-		isPolling = false;
-		todoCRUD.delete($scope, todo);	
+		$scope.todos.$remove(todo.$id);
 	};	
 	
 	$scope.prevday = function (todo) {
-		console.log(todo.day);
 		todo.day = todo.day - 1;
-		todoCRUD.update($scope, todo);	
+		$scope.todos.$save();
 	};	
 	
 	$scope.nextday = function (todo) {
 		todo.day = todo.day + 1;
-		todoCRUD.update($scope, todo);	
+		$scope.todos.$save(); 
 	};
 	
 	$scope.update = function(todo) {
 		todo.completed = (todo.completed == true ? false : true);
-		todoCRUD.update($scope);
+		$scope.todos.$save(); 
 	}	
-	
 
 	// Edit an existing item
 	$scope.editTodo = function (todo) {
@@ -108,22 +116,30 @@ today.controller('TodayCtrl', function TodayCtrl($scope, $route, $location, $rou
 		if (!todo.title) {
 			$scope.removeTodo(todo);
 		} else {
-			todoCRUD.update($scope);
+			$scope.todos.$save();
 		}
 	};
 
 	$scope.revertEditing = function (todo) {
 		$scope.todos[$scope.todos.indexOf(todo)] = $scope.originalTodo;
 		$scope.doneEditing($scope.originalTodo);
-		console.log('revert');
-		isPolling = true;
 	};	
 	
 	$scope.startEditing = function (todo) {
 		todo = $scope.editedTodo;
-		console.log('start');
-		isPolling = false;
 	};
-
-
+	
+	$scope.count = function () { 
+		// Recount number of tasks per day - do this more efficiently
+		angular.forEach($scope.days, function(day) {
+			day.tasks = 0;
+	    	angular.forEach($scope.todos, function(todo) {
+		    	if (todo.day == day.day && todo.completed == false) {
+		      		++day.tasks;	    		
+		    	}
+		    });	
+	    });	 
+	}
 });
+
+

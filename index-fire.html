@@ -13,13 +13,14 @@
 	
 	<link rel="stylesheet" href="css/base.css?v=3">
 	<link rel='stylesheet' id='opensans' href='http://fonts.googleapis.com/css?family=Open+Sans:300,800' type='text/css' media='all' />
-	
+
 	<script src="js/angular.min.js"></script>
+	<script src="https://cdn.firebase.com/js/client/1.0.6/firebase.js"></script>
+	<script src="https://cdn.firebase.com/libs/angularfire/0.7.1/angularfire.min.js"></script>
 	<script src="js/angular-resource.min.js"></script>
 	<script src="js/angular-route.min.js"></script>
-	<script src="js/app.js"></script>
-	<script src="js/controllers.js"></script>
-	<script src="js/services.js"></script>
+	<script src="js/app-fire.js"></script>
+	<script src="js/controllers-fire.js"></script>
 		
 	
 </head>
@@ -30,13 +31,13 @@
 			<header id="header">
 				<h1 ng-click="selected = 1" ng-class="{active: selected == 1}"><strong>{{selectedDay*oneday | date:'EEE, d MMM'}} </strong> Tasks
 				</h1>
-
 			</header>
+
 			
-			<section id="main" ng-show="todos.length" ng-cloak>
+			<section id="main" ng-cloak>
 				
 				<ul id="todo-list">
-					<li ng-repeat="todo in todos | filter:dayFilter | orderBy: 'completed'" ng-class="{completed: todo.completed, editing: todo == editedTodo}">
+					<li ng-repeat="todo in todos | orderByPriority | filter:dayFilter | orderBy: 'completed'" ng-class="{completed: todo.completed, editing: todo == editedTodo}">
 						<div class="view">
 							<input class="toggle" type="checkbox" ng-model="todo.completed" ng-click="update(todo);">
 							<label ng-dblclick="editTodo(todo)">{{todo.title}}</label>
@@ -51,10 +52,6 @@
 					</li>
 				</ul>
 			</section>
-
-			<p ng-hide="todos.length" class="no-results">
-				<em>No items</em> 
-			</p>
 				
 			<div id="add">
 				<form id="todo-form" ng-submit="create()">

@@ -2,7 +2,7 @@
 'use strict';
 
 /**
- * Services that persists and retrieves TODOs from localStorage
+ * Services that persists and retrieves TODOs from items.json via api.php script
  */
  
 today.factory('Data', function ($resource) {

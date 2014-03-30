@@ -2,7 +2,7 @@
 
 /**
  */
-var today = angular.module('today', ['ngResource', 'ngRoute']);
+var today = angular.module('today', ['ngResource', 'ngRoute', 'firebase']);
 
 today.config(function ($routeProvider) {
     $routeProvider
